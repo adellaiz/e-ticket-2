@@ -40,5 +40,6 @@ Route::get('/tickets/{id}/order', function($id){
     ]);
 });
 Route::post('/tickets/{id}/order', [OrderController::class, 'store']);
+Route::get('/orders/{bookingCode}/pdf', [OrderController::class, 'pdf']);
 Route::get('/orders/{bookingCode}', [OrderController::class, 'show']);
 Route::post('payments/midtrans-notification', [PaymentCallbackController::class, 'receive']);
