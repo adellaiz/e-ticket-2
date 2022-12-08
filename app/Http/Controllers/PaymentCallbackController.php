@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Mail\BookingMail;
+use App\Mail\OrderTicketMail;
 use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Midtrans\CallbackService;
@@ -27,6 +29,9 @@ class PaymentCallbackController extends Controller
                 Order::where('id', $order->id)->update([
                     'status' => Order::STATUS_PAID
                 ]);
+                Mail::to($order->users)->send(new OrderTicketMail([
+                    'order' => $order,
+                ]));
             }
 
             if ($callback->isExpire()) {
@@ -41,7 +46,7 @@ class PaymentCallbackController extends Controller
                 ]);
             }
 
-            if(($o = Order::where('status', '!=', Order::STATUS_UNPAID)->find($order->id))){
+            if(($o = Order::whereNotIn('status', [Order::STATUS_UNPAID, Order::STATUS_PAID])->find($order->id))){
                 $users = $o->users;
 
                 Mail::bcc($users)->send(new BookingMail([
